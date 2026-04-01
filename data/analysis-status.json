@@ -1,0 +1,9 @@
+{
+  "event": "openai-request-succeeded",
+  "openaiKeyPresent": true,
+  "mode": "openai",
+  "model": "gpt-4.1-mini",
+  "chosenPath": "openai",
+  "schemaName": "scroll_session_analysis",
+  "timestamp": "2026-03-31T20:10:11.862Z"
+}
