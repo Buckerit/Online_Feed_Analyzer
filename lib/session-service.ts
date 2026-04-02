@@ -79,7 +79,7 @@ export async function createSessionFromForm(formData: FormData): Promise<ScrollS
 
     const buffer = Buffer.from(await image.arrayBuffer());
     const safeName = `${id}-${randomUUID()}${ext}`;
-    const content = await writeUpload(safeName, buffer);
+    const content = await writeUpload(safeName, buffer, imageMimeTypes[ext] ?? "image/png");
     const note = imageNotes[index] ?? "";
     const localCategory = classifyTextEntry(
       `${image.name.replace(/[_-]+/g, " ")} ${note}`.trim()

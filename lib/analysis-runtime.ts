@@ -14,7 +14,9 @@ type AnalysisDebugState = {
 };
 
 let lastAnalysisDebugState: AnalysisDebugState | null = null;
-const analysisDebugFile = path.join(process.cwd(), "data", "analysis-status.json");
+const analysisDebugFile = process.env.VERCEL
+  ? path.join("/tmp", "scroll-session-analyzer", "analysis-status.json")
+  : path.join(process.cwd(), "data", "analysis-status.json");
 
 export function isOpenAIEnabled() {
   const apiKey = process.env.OPENAI_API_KEY?.trim();

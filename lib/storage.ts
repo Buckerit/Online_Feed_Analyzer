@@ -4,13 +4,19 @@ import { buildLocalSessionAnalysis, deriveDominantSide } from "@/lib/analysis";
 import { CATEGORIES } from "@/lib/types";
 import type { ItemSource, ScrollItem, ScrollSession, SessionCategory } from "@/lib/types";
 
-const dataDir = path.join(process.cwd(), "data");
+const isVercelRuntime = Boolean(process.env.VERCEL);
+const dataDir = isVercelRuntime
+  ? path.join("/tmp", "scroll-session-analyzer")
+  : path.join(process.cwd(), "data");
 const uploadsDir = path.join(process.cwd(), "public", "uploads");
 const sessionsFile = path.join(dataDir, "sessions.json");
 
 async function ensureStorage() {
   await fs.mkdir(dataDir, { recursive: true });
-  await fs.mkdir(uploadsDir, { recursive: true });
+
+  if (!isVercelRuntime) {
+    await fs.mkdir(uploadsDir, { recursive: true });
+  }
 
   try {
     await fs.access(sessionsFile);
@@ -58,7 +64,11 @@ export async function saveSessions(sessions: ScrollSession[]) {
   await fs.rename(tempFile, sessionsFile);
 }
 
-export async function writeUpload(fileName: string, buffer: Buffer) {
+export async function writeUpload(fileName: string, buffer: Buffer, mimeType: string) {
+  if (isVercelRuntime) {
+    return `data:${mimeType};base64,${buffer.toString("base64")}`;
+  }
+
   await ensureStorage();
   const fullPath = path.join(uploadsDir, fileName);
   await fs.writeFile(fullPath, buffer);
@@ -79,6 +89,10 @@ export async function deleteSessionRecord(id: string) {
     session.items
       .filter((item) => item.type === "image")
       .map(async (item) => {
+        if (!item.content.startsWith("/")) {
+          return;
+        }
+
         const relativePath = item.content.replace(/^\/+/, "").replaceAll("/", path.sep);
         const absolutePath = path.join(process.cwd(), "public", relativePath);
 
